@@ -1,3 +1,4 @@
+
 import os
 os.environ['OMP_NUM_THREADS'] = '1'
 import sys
@@ -388,13 +389,11 @@ class PhysicsPlanner:
     def get_contact_bodies(self, part_id):
         return self.sim.get_contact_bodies(f'part{part_id}')
 
-
 class BK_RRT(PhysicsPlanner):
     '''
     Behavioral Kinodynamic Rapidly-Exploring Random Trees (BK-RRT) [Zickler and Veloso 2009]
     '''
     def select_state(self, tree):
-
         # randomly sample a state (q)
         ratio = np.random.random(3)
         if self.rotation:
@@ -405,6 +404,7 @@ class BK_RRT(PhysicsPlanner):
             sampled_q = ratio * self.state_lower_bound + (1.0 - ratio) * self.state_upper_bound
 
         # find the closest state in the tree
+        print("Tree size:", len(tree.get_nodes()))
         closest_state, closest_dist = None, np.inf
         for state in tree.get_nodes():
             dist = self.q_distance(sampled_q, state.q)
@@ -696,6 +696,8 @@ def get_planner(name):
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
+    randomSeed = int(time())
+
     parser = ArgumentParser()
     parser.add_argument('--planner', type=str, required=True, choices=['bfs', 'bk-rrt'])
     parser.add_argument('--id', type=str, required=True, help='assembly id (e.g. 00000)')
@@ -709,7 +711,7 @@ if __name__ == '__main__':
     parser.add_argument('--force-mag', type=float, default=100, help='magnitude of force')
     parser.add_argument('--frame-skip', type=int, default=100, help='control frequency')
     parser.add_argument('--max-time', type=float, default=120, help='timeout')
-    parser.add_argument('--seed', type=int, default=1, help='random seed')
+    parser.add_argument('--seed', type=int, default=randomSeed, help='random seed')
     parser.add_argument('--render', default=False, action='store_true', help='if render the result')
     parser.add_argument('--record-dir', type=str, default=None, help='directory to store rendering results')
     parser.add_argument('--save-dir', type=str, default=None)
